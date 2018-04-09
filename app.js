@@ -10,6 +10,7 @@ mongoose.connect("mongodb://192.168.1.12:27017/nodeRestApi")
 
 /*  Routes  */
 const roleRoutes = require('./api/routes/role');
+const userRoutes = require('./api/routes/user');
 
 app.use(logger('dev'));
 
@@ -17,6 +18,7 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
 app.use("/roles", roleRoutes);
+app.use("/users", userRoutes);
 
 app.use((request,response,next) => {
     const error = new Error("Not Found");
