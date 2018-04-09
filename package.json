@@ -1,0 +1,22 @@
+{
+  "name": "node_rest_api",
+  "version": "1.0.0",
+  "description": "Demo Application showcasing application structure",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/vishal_imperial/node_rest_api.git"
+  },
+  "author": "Imperial Softech",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/vishal_imperial/node_rest_api#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.3",
+    "mongoose": "^5.0.13",
+    "multer": "^1.3.0"
+  }
+}
