@@ -1,9 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const logger = require('morgan');
+const mongoose = require("mongoose");
 
 const app = express();
 
+/*  Mongoose Connect */
+mongoose.connect("mongodb://192.168.1.12:27017/nodeRestApi")
+
+/*  Routes  */
 const roleRoutes = require('./api/routes/role');
 
 app.use(logger('dev'));
