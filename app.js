@@ -29,9 +29,9 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
 
-app.use("/",+ roleModule,roleRoutes);
-app.use("/", + userModule,userRoutes);
-app.use('/', + authModule, authRoutes );
+app.use("/" + roleModule,roleRoutes);
+app.use("/" + userModule,userRoutes);
+app.use('/' + authModule, authRoutes );
 app.use('/' + categoryModule, categoryRoutes);
 
 app.use((request,response,next) => {
@@ -48,6 +48,5 @@ app.use((error,request,response,next) => {
     return response.status(status)
                     .json({error : {message: error.message}});
 });
-
 
 module.exports = app;
