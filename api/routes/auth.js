@@ -29,8 +29,7 @@ router.post("/signup", (req, res, next) => {
                         });
                     } else {
                         const user = new User({
-                            _id: new mongoose.Types.ObjectId(),
-                            fullname: req.body.fullname,
+                            name: req.body.name,
                             email: req.body.email,
                             password: hash
                         });
@@ -51,7 +50,6 @@ router.post("/signup", (req, res, next) => {
                                     error: err
                                 });
                             });
-
                     }
                 });
             }
