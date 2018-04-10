@@ -4,15 +4,24 @@ const bodyParser = require('body-parser');
 const logger = require('morgan');
 const mongoose = require("mongoose");
 
+const config = require('./config');
+
+const connection = config.dbConfig.connection;
+const categoryModule = config.routeSlug.category;
+const authModule = config.routeSlug.auth;
+const userModule = config.routeSlug.users;
+const roleModule = config.routeSlug.roles;
+
 const app = express();
 
 /*  Mongoose Connect */
-mongoose.connect("mongodb://192.168.1.12:27017/nodeRestApi")
+mongoose.connect(connection);
 
 /*  Routes  */
 const roleRoutes = require('./api/routes/role');
 const userRoutes = require('./api/routes/user');
 const authRoutes = require('./api/routes/auth');
+const categoryRoutes = require('./api/routes/category');
 
 app.use(logger('dev'));
 
@@ -20,9 +29,10 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
 
-app.use("/roles", roleRoutes);
-app.use("/users", userRoutes);
-app.use('/auth',authRoutes);
+app.use("/",+ roleModule,roleRoutes);
+app.use("/", + userModule,userRoutes);
+app.use('/', + authModule, authRoutes );
+app.use('/' + categoryModule, categoryRoutes);
 
 app.use((request,response,next) => {
     const error = new Error("Not Found");
