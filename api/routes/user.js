@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/user');
 const multer = require('multer');
 const fs = require('fs');
+const Joi = require('joi');
 
 const appConfig = require('../../config');
 
@@ -21,7 +22,9 @@ const upload = multer({
     fileFilter: (request, file, cb) => {
         const allowedMimeType = ["image/jpeg", "image/jpg"];
         if (allowedMimeType.indexOf(file.mimetype) == -1) {
-            cb(null, false);
+            const error = new Error("Invalid file Uploaded");
+            error.status = 500;
+            cb(error, false);
         } else {
             cb(null, true);
         }
@@ -100,11 +103,20 @@ router.get('/', (request, response) => {
 
 /*  Details  */
 router.get('/:userId', (request, response) => {
+
     User.findOne({
             _id: request.params.userId
         })
         .exec()
-        .then((data) => {
+        .then((data) => 
+        {
+            if( !data )
+            {
+                return response.status(500).json({
+                    'message': 'User Not Found'
+                }); 
+            }
+
             let tmpRequestData = new RequestUrl();
             tmpRequestData.delete.url = tmpRequestData.delete.url + '/' + data._id;
             tmpRequestData.update.url = tmpRequestData.update.url + '/' + data._id;
@@ -131,7 +143,24 @@ router.get('/:userId', (request, response) => {
 });
 
 /*  Create  */
-router.post('/', upload.single('profileImage'), (request, response) => {
+router.post('/', upload.single('profileImage'), (request, response) => 
+{
+    const validate = Joi.validate(request.body, {
+        name: Joi.string().required(),
+        email: Joi.string().email().required(),
+        password: Joi.string().required(),
+        roles: Joi.any(),
+        profileImage: Joi.any(),
+    });
+
+    if (validate.error) 
+    {
+        return response.status(500).json({
+            'message': validate.error.details[0].message
+        });
+    }
+
+
     /*  Check Duplication  */
     User.findOne({
             email: request.body.email,
@@ -142,8 +171,8 @@ router.post('/', upload.single('profileImage'), (request, response) => {
                     const error = new Error("User Already Exists");
                     error.status = 500;
 
-                    if (fs.existsSync(request.file)) {
-                        fs.unlinkSync(request.file);
+                    if (fs.existsSync(request.file.path)) {
+                        fs.unlinkSync(request.file.path);
                     }
 
                     reject(error);
@@ -191,6 +220,20 @@ router.post('/', upload.single('profileImage'), (request, response) => {
 
 /*  Edit  */
 router.put('/:userId', upload.single('profileImage'), (request, response) => {
+
+    const validate = Joi.validate(request.body, {
+        name: Joi.string().required(),
+        email: Joi.string().email().required(),
+        password: Joi.string().required(),
+        roles: Joi.any(),
+        profileImage: Joi.any(),
+    });
+
+    if (validate.error) {
+        return response.status(500).json({
+            'message': validate.error.details[0].message
+        });
+    }
 
     /*  Check Duplication  */
     User.findOne({
