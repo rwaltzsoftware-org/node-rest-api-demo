@@ -2,12 +2,12 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const fs = require('fs');
-const Category = require('../models/category');
+const Product = require('../models/product');
 const config = require('../../config');
 
-const categoryFolder = './'+config.filePaths.category;
-const moduleName = config.routeSlug.category;
-let categoryImage = String;
+const productFolder = './' + config.filePaths.product;
+const moduleName = config.routeSlug.product;
+let productImage = String;
 
 /*  Possible Routes  */
 const RequestUrl = function () {
@@ -37,10 +37,10 @@ const RequestUrl = function () {
 
 /* Upload File Preprations */
 const storage = multer.diskStorage({
-    destination: categoryFolder,
+    destination: productFolder,
     filename: (request, file, callBack) => {
-        categoryImage = new Date().toISOString() + file.originalname;
-        callBack(null, categoryImage);
+        productImage = new Date().toISOString() + file.originalname;
+        callBack(null, productImage);
     }
 })
 
@@ -61,35 +61,36 @@ const upload = multer({
 });
 
 
-/* Route - Category Add */
+/* Route - Product Add */
 router.post('/', upload.single('image'), (request, response, next) => {
 
-    /* Check Category Name Duplication */
-    Category.findOne({
-            name: request.body.name
-        })
+    /* Check Product Name Duplication */
+    Product.findOne({
+        name: request.body.name
+    })
         .exec()
         .then(result => {
             return new Promise((resolve, reject) => {
                 if (result) {
-                    /* Removed category image if duplication found */
-                    fs.unlink(categoryFolder + categoryImage);
-                    reject({ message: 'Category with this name already present'});
+                    /* Removed Product image if duplication found */
+                    fs.unlink(productFolder + productImage);
+                    reject({ message: 'Product with this name already present' });
                 } else {
                     resolve();
                 }
             })
         })
         .then(() => {
-            /* Insert Category Records */
-            const categorySave = new Category({
+            /* Insert Product Records */
+            const productSave = new Product({
                 'name': request.body.name,
                 'image': request.file.path,
-                'description': request.body.description
+                'description': request.body.description,
+                'category': request.body.category
             });
 
 
-            categorySave.save()
+            productSave.save()
                 .then(result => {
                     let temRequestData = new RequestUrl();
                     temRequestData.details.url = temRequestData.details.url + '/' + result._id;
@@ -97,7 +98,7 @@ router.post('/', upload.single('image'), (request, response, next) => {
 
                     response.status(201)
                         .json({
-                            message: 'Category added successfully',
+                            message: 'Product added successfully',
                             requests: [{
                                 'details': temRequestData.details
                             }]
@@ -106,7 +107,7 @@ router.post('/', upload.single('image'), (request, response, next) => {
                 .catch(error => {
                     response.status(500)
                         .json({
-                            message: 'Error while adding Category',
+                            message: 'Error while adding Product',
                             Error: error
                         })
                 });
@@ -121,17 +122,18 @@ router.post('/', upload.single('image'), (request, response, next) => {
 });
 
 /* Route - Get Specific Data using Id */
-router.get('/:categoryID', (request, response, next) => {
-    const id = request.params.categoryID;
+router.get('/:productID', (request, response, next) => {
+    const id = request.params.productID;
 
-    Category.findById({
+    Product.findById({
             _id: id
         })
+        .populate('category', 'name image description')
         .exec()
         .then(result => {
             return new Promise((resolve, reject) => {
                 if (result === null) {
-                    reject({ message: 'Can not found any category with this ID'});
+                    reject({ message: 'Can not found any Product with this ID' });
                 } else {
                     resolve(result);
                 }
@@ -145,6 +147,7 @@ router.get('/:categoryID', (request, response, next) => {
                 id: result._id,
                 name: result.name,
                 description: result.description,
+                category: result.category,
                 filePath: config.baseUrl + result.image
             };
 
@@ -158,12 +161,12 @@ router.get('/:categoryID', (request, response, next) => {
                 })
         })
         .catch(err => {
-            if (err.name === 'CastError'){
+            if (err.name === 'CastError') {
                 err = {
-                    message: 'Inccorect Category ID, Please check'
+                    message: 'Inccorect Product ID, Please check'
                 }
             }
-            
+
             response.status(500)
                 .json({
                     error: err
@@ -171,78 +174,79 @@ router.get('/:categoryID', (request, response, next) => {
         });
 });
 
-/* Route - Update Category */
-router.put('/:categoryID',upload.single('image'),(request,response,next)=>{
-    const id =  request.params.categoryID;
+/* Route - Update Product */
+router.put('/:productID', upload.single('image'), (request, response, next) => {
+    const id = request.params.productID;
 
-    Category.findOne({
+    Product.findOne({
         name: request.body.name
     })
-    .exec()
-    .then(result =>{
-        return new Promise((resolve,reject)=>{
-            if(result){
-                reject({message:'Category already present with same name'});
-            }else{
-                resolve();
+        .exec()
+        .then(result => {
+            return new Promise((resolve, reject) => {
+                if (result) {
+                    reject({ message: 'Product already present with same name' });
+                } else {
+                    resolve();
+                }
+            });
+        })
+        .then(() => {
+            /* Unlink Existing Image - If image upload */
+            /* if(request.file != undefined){
+                Product.findById(id)
+                .then(result=>{
+    
+                })
+                .catch();
+            } */
+
+            const productObj = {};
+
+            for (tmp in request.body) {
+                productObj[tmp] = request.body[tmp];
             }
-        });    
-    })
-    .then(()=>{
-        /* Unlink Existing Image - If image upload */
-        /* if(request.file != undefined){
-            Category.findById(id)
-            .then(result=>{
 
-            })
-            .catch();
-        } */
-        
-        const categoryObj = {};
+            let updateCriteria = {
+                _id: id
+            }
 
-        for(tmp in request.body){
-            categoryObj[tmp] = request.body[tmp]; 
-        }
-        
-        let updateCriteria = {
-            _id : id
-        }
+            let updateData = {
+                $set: productObj
+            }
 
-        let updateData = {
-            $set: categoryObj
-        }
+            Product.update(updateCriteria, updateData)
+                .then(result => {
+                    const temRequestData = new RequestUrl();
+                    temRequestData.details.url = temRequestData.details.url + '/' + id;
 
-        Category.update(updateCriteria, updateData)
-        .then(result=>{
-            const temRequestData = new RequestUrl();
-            temRequestData.details.url = temRequestData.details.url + '/' + id;
-
-            response.status(200)
-            .json({
-                message: 'Category Update Successfully',
-                requests: [{
-                    'details': temRequestData.details
-                }]
-            })
+                    response.status(200)
+                        .json({
+                            message: 'Product Update Successfully',
+                            requests: [{
+                                'details': temRequestData.details
+                            }]
+                        })
+                })
+                .catch(err => {
+                    response.status(500)
+                        .json({
+                            error: err
+                        })
+                })
         })
-        .catch(err=>{
+        .catch(err => {
             response.status(500)
-            .json({
-                error: err
-            })
-        })
-    })
-    .catch(err=>{
-        response.status(500)
-        .json({
-            error: err
+                .json({
+                    error: err
+                });
         });
-    });
 });
 
-/* Route - Getting All Categories */
+/* Route - Getting All Produts */
 router.get('/', (request, response, next) => {
-    Category.find()
+    Product.find()
+        .populate('category','name image description')
         .exec()
         .then(result => {
             let preparedData = result.map((tmpData) => {
@@ -256,6 +260,7 @@ router.get('/', (request, response, next) => {
                     name: tmpData.name,
                     description: tmpData.description,
                     image: config.baseUrl + tmpData.image,
+                    category: tmpData.category,
                     requests: [{
                         'details': tmpRequestData.details
                     }]
@@ -281,23 +286,23 @@ router.get('/', (request, response, next) => {
         });
 });
 
-/* Route - Delete Catgory */
-router.delete('/:categoryID',(request,response,next)=>{
-    const id = request.params.categoryID;
+/* Route - Delete Product */
+router.delete('/:productID', (request, response, next) => {
+    const id = request.params.productID;
 
-    Category.remove({_id:id})
-    .then(result=>{
-        response.status(200)
-        .json({
-            message: 'Category Deleted Successfully'
+    Product.remove({ _id: id })
+        .then(result => {
+            response.status(200)
+                .json({
+                    message: 'Product Deleted Successfully'
+                });
+        })
+        .catch(err => {
+            response.status(500)
+                .json({
+                    error: err
+                });
         });
-    })
-    .catch(err=>{
-        response.status(500)
-        .json({
-            error: err
-        });
-    });
 });
 
 module.exports = router;

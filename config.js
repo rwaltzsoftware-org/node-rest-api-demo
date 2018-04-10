@@ -9,11 +9,13 @@ let dbConfig = {
 }
 
 let filePaths = {
-    category: './uploads/category/'
+    category: 'uploads/category',
+    product: 'uploads/product'
 }
 
 let routeSlug = {
-    category: 'categories'
+    category: 'categories',
+    product: 'products'
 }
 
 appConfig.baseUrl = appConfig.protocol + appConfig.host + ":" +appConfig.port + '/' ;
