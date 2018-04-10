@@ -49,5 +49,4 @@ app.use((error,request,response,next) => {
                     .json({error : {message: error.message}});
 });
 
-
 module.exports = app;
