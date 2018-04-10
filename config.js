@@ -13,7 +13,8 @@ let dbConfig = {
 }
 
 let filePaths = {
-    category: './uploads/category/'
+    category: './uploads/category/',
+    user: './uploads/user/'
 }
 
 let routeSlug = {

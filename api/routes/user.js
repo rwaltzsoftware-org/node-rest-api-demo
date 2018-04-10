@@ -9,7 +9,7 @@ const appConfig = require('../../config');
 
 /*  Upload Config  */
 const storage = multer.diskStorage({
-    destination: "./uploads/users",
+    destination: appConfig.filePaths.user,
     filename: (request, file, cb) => {
         const fileName = new Date().toISOString() + "-" + file.originalname;
         cb(null, fileName);
@@ -217,7 +217,7 @@ router.put('/:userId', upload.single('profileImage'), (request, response) => {
 
         })
         .then(() => {
-            /* Update Role */
+            /* Update User */
             let user = {};
             for (let tmp in request.body) {
                 user[tmp] = request.body[tmp];
