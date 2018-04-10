@@ -19,6 +19,7 @@ app.use(logger('dev'));
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
+
 app.use("/roles", roleRoutes);
 app.use("/users", userRoutes);
 app.use('/auth',authRoutes);
