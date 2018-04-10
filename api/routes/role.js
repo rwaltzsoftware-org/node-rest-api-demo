@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Role = require('../models/role');
+const Joi = require('joi');
 
 const config = require('../../config');
 
@@ -75,6 +76,12 @@ router.get('/:roleId', (request, response) => {
         })
         .exec()
         .then((data) => {
+            if (!data) {
+                return response.status(500).json({
+                    'message': 'Role Not Found'
+                });
+            }
+
             let tmpRequestData = new RequestUrl();
             tmpRequestData.delete.url = tmpRequestData.delete.url + '/' + data._id;
             tmpRequestData.update.url = tmpRequestData.update.url + '/' + data._id;
@@ -99,20 +106,55 @@ router.get('/:roleId', (request, response) => {
 });
 
 /*  Create  */
-router.post('/', (request, response) => 
-{
+router.post('/', (request, response) => {
+    const validate = Joi.validate(request.body, {
+        name: Joi.string().required(),
+    });
+
+    if (validate.error) {
+        return response.status(500).json({
+            'message': validate.error.details[0].message
+        });
+    }
+
     /*  Check Duplication  */
     Role.findOne({
             name: request.body.name,
         })
         .then((data) => {
-            if (data) {
-                return response
-                    .status(500)
-                    .json({
-                        message: "Role Already Exists"
-                    });
-            }
+            return new Promise((resolve, reject) => {
+                if (data) {
+                    const error = new Error("Role Already Exists");
+                    error.status = 500;
+
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            });
+        })
+        .then(() => {
+
+            /* Create New Role */
+            const role = new Role({
+                name: request.body.name
+            });
+
+            return role.save()
+                .then((data) => {
+                    /* Add Role Id to Url  */
+                    let tmpRequestData = new RequestUrl();
+                    tmpRequestData.details.url = tmpRequestData.details.url + '/' + role._id;
+
+                    return response
+                        .status(201)
+                        .json({
+                            message: "Role Created Succesfuly",
+                            requests: [{
+                                'details': tmpRequestData.details
+                            }]
+                        });
+                });
         })
         .catch((error) => {
             return response
@@ -121,42 +163,21 @@ router.post('/', (request, response) =>
                     message: error.message
                 });
         });
-
-    /* Create New Role */    
-    const role = new Role({
-        name: request.body.name
-    });
-
-    role.save()
-        .then((data) => {
-            /* Add Role Id to Url  */
-            let tmpRequestData = new RequestUrl();
-            tmpRequestData.details.url = tmpRequestData.details.url + '/' + role._id;
-
-            return response
-                .status(201)
-                .json({
-                    message: "Role Created Succesfuly",
-                    requests: [{
-                        'details': tmpRequestData.details
-                    }]
-                });
-        })
-        .catch((error) => {
-
-            return response
-                .status(500)
-                .json({
-                    status: 'failure',
-                    message: error.message
-                });
-        })
-
 });
 
 /*  Edit  */
 router.put('/:roleId', (request, response) => {
-   
+
+    const validate = Joi.validate(request.body, {
+        name: Joi.string().required(),
+    });
+
+    if (validate.error) {
+        return response.status(500).json({
+            'message': validate.error.details[0].message
+        });
+    }
+
     /*  Check Duplication  */
     Role.findOne({
             name: request.body.name,
@@ -165,13 +186,42 @@ router.put('/:roleId', (request, response) => {
             }
         })
         .then((data) => {
-            if (data) {
-                return response
-                    .status(500)
-                    .json({
-                        message: "Role Already Exists"
-                    });
-            }
+            return new Promise((resolve, reject) => {
+                if (data) {
+                    const error = new Error("Role Already Exists");
+                    error.status = 500;
+
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            });
+        })
+        .then(() => {
+            /* Update Role */
+            const role = {
+                name: request.body.name
+            };
+
+            let updateCriteria = { _id: request.params.roleId };
+            let updateData = { $set: role };
+
+            return Role.update(updateCriteria,updateData)
+                .exec()
+                .then((data) => {
+
+                    let tmpRequestData = new RequestUrl();
+                    tmpRequestData.details.url = tmpRequestData.details.url + '/' + role._id;
+
+                    return response
+                        .status(200)
+                        .json({
+                            message: "Role Updated Succesfuly",
+                            requests: [{
+                                'details': tmpRequestData.details
+                            }]
+                        });
+                });
         })
         .catch((error) => {
             return response
@@ -181,39 +231,8 @@ router.put('/:roleId', (request, response) => {
                 });
         });
 
-    /* Update Role */
-    const role = {
-        name: request.body.name
-    };
-
-    Role.update({
-            _id: request.params.roleId
-        }, {
-            $set: role
-        })
-        .exec()
-        .then((data) => {
-
-            let tmpRequestData = new RequestUrl();
-            tmpRequestData.details.url = tmpRequestData.details.url + '/' + role._id;
-
-            return response
-                .status(200)
-                .json({
-                    message: "Role Updated Succesfuly",
-                    requests: [{
-                        'details': tmpRequestData.details
-                    }]
-                });
-        })
-        .catch((error) => {
-
-            return response
-                .status(500)
-                .json({
-                    message: error.message
-                });
-        })
+    
+       
 });
 
 /*  Delete  */

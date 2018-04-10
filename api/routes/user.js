@@ -107,6 +107,7 @@ router.get('/:userId', (request, response) => {
     User.findOne({
             _id: request.params.userId
         })
+        .populate('roles', 'name')
         .exec()
         .then((data) => 
         {
