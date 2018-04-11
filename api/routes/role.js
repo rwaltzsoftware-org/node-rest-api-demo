@@ -1,20 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const roleController = require('../controllers/role');
+const checkAuth = require('../middlewares/check-auth');
 
 /*  Listing  */
-router.get('/', roleController.listing);
+router.get('/',checkAuth, roleController.listing);
 
 /*  Details  */
-router.get('/:roleId', roleController.getDetails);
+router.get('/:roleId',checkAuth, roleController.getDetails);
 
 /*  Create  */
-router.post('/', roleController.store);
+router.post('/',checkAuth, roleController.store);
 
 /*  Edit  */
-router.put('/:roleId', roleController.update);
+router.put('/:roleId',checkAuth, roleController.update);
 
 /*  Delete  */
-router.delete('/:roleId', roleController.delete);
+router.delete('/:roleId',checkAuth, roleController.delete);
 
 module.exports = router;

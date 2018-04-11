@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const appConfig = require('../../config');
 const userController = require('../controllers/user');
+const checkAuth = require('../middlewares/check-auth');
 
 /*  Upload Config  */
 const storage = multer.diskStorage({
@@ -29,18 +30,18 @@ const upload = multer({
 
 
 /*  Listing  */
-router.get('/', userController.listing);
+router.get('/',checkAuth, userController.listing);
 
 /*  Details  */
-router.get('/:userId', userController.getDetails );
+router.get('/:userId',checkAuth, userController.getDetails );
 
 /*  Create  */
-router.post('/', upload.single('profileImage'), userController.store );
+router.post('/', upload.single('profileImage'),checkAuth, userController.store );
 
 /*  Edit  */
-router.put('/:userId', upload.single('profileImage'), userController.update);
+router.put('/:userId', upload.single('profileImage'),checkAuth, userController.update);
 
 /*  Delete  */
-router.delete('/:userId', userController.delete);
+router.delete('/:userId',checkAuth, userController.delete);
 
 module.exports = router;
