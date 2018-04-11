@@ -118,6 +118,7 @@ exports.login = (request, response, next) => {
                     };
 
                     const token = jwt.sign(tokenPayload, appConfig.secretKey);
+                    
                     return response.status(200).json({
                         message: "Login Successful",
                         token: token

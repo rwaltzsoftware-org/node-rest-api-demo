@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const config = require('../../config');
+const checkAuth = require('../middlewares/check-auth');
 
 const categoryFolder = './' + config.filePaths.category;
 const categoryController = require('../controllers/category');
@@ -35,18 +36,18 @@ const upload = multer({
 
 
 /* Route - Category Add */
-router.post('/', upload.single('image'), categoryController.store);
+router.post('/',  upload.single('image'),checkAuth, categoryController.store);
 
 /* Route - Get Specific Data using Id */
-router.get('/:categoryID', categoryController.get);
+router.get('/:categoryID',checkAuth, categoryController.get);
 
 /* Route - Update Category */
-router.put('/:categoryID', upload.single('image'), categoryController.update);
+router.put('/:categoryID',checkAuth, upload.single('image'), categoryController.update);
 
 /* Route - Getting All Categories */
-router.get('/', categoryController.getAll);
+router.get('/',checkAuth, categoryController.getAll);
 
 /* Route - Delete Catgory */
-router.delete('/:categoryID', categoryController.delete);
+router.delete('/:categoryID',checkAuth, categoryController.delete);
 
 module.exports = router;
