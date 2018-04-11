@@ -1,5 +1,5 @@
 let appConfig = {
-    protocol : 'http://',
+    protocol: 'http://',
     host: 'localhost',
     port: process.env.NODE_APP_PORT || 3000,
     saltRounds: 15,
@@ -22,11 +22,11 @@ let routeSlug = {
     category: 'categories',
     product: 'products',
     auth: 'auth',
-    users:'users',
-    roles:'roles'
+    users: 'users',
+    roles: 'roles'
 }
 
-appConfig.baseUrl = appConfig.protocol + appConfig.host + ":" +appConfig.port + '/' ;
+appConfig.baseUrl = appConfig.protocol + appConfig.host + ":" + appConfig.port + '/';
 
 appConfig.dbConfig = dbConfig;
 appConfig.filePaths = filePaths;

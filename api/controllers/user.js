@@ -47,7 +47,7 @@ Controller.listing = (request, response) => {
                     _id: tmpData._id,
                     name: tmpData.name,
                     email: tmpData.email,
-                    profileImage: tmpData.profileImage,
+                    profileImage: appConfig.baseUrl + tmpData.profileImage,
                     roles: tmpData.roles,
                     requests: [{
                         'details': tmpRequestData.details
@@ -97,6 +97,7 @@ Controller.getDetails = (request, response) => {
                 name: data.name,
                 email: data.email,
                 roles: data.roles,
+                profileImage: appConfig.baseUrl + data.profileImage,
                 requests: tmpRequestData
             };
 
