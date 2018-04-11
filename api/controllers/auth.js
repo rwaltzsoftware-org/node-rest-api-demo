@@ -12,7 +12,7 @@ exports.signup = (request, response, next) => {
         name: Joi.string().required(),
         email: Joi.string().email().required(),
         password: Joi.string().required()
-    }
+    };
 
     const validate = Joi.validate(request.body,validationSchema);
     if(validate.error)
@@ -73,7 +73,7 @@ exports.login = (request, response, next) => {
     const validationSchema = {
         email: Joi.string().email().required(),
         password: Joi.string().required()
-    }
+    };
 
     const validate = Joi.validate(request.body,validationSchema);
     if(validate.error)
@@ -136,7 +136,7 @@ exports.forgotPassword = (request, response, next) => {
 
     const validationSchema = {
         email: Joi.string().email().required()       
-    }
+    };
 
     const validate = Joi.validate(request.body,validationSchema);
     if(validate.error)
@@ -201,7 +201,7 @@ exports.resetPassword = (request, response, next) => {
     const validationSchema = {
         reset_code: Joi.string().required(),
         new_password:  Joi.string().required()
-    }
+    };
 
     const validate = Joi.validate(request.body,validationSchema);
     if(validate.error)
@@ -251,7 +251,7 @@ exports.resetPassword = (request, response, next) => {
                                  message: "Password Reset Succussfully"
                              });
                          }
-                     })
+                     });
              });
         })
         .catch((error) => {           
