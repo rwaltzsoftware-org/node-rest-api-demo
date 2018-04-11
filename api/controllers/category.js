@@ -197,15 +197,21 @@ Controller.update = (request, response, next) => {
                 }
             });
         })
-        .then(() => {
-            /* Unlink Existing Image - If image upload */
-            /* if(request.file != undefined){
-                Category.findById(id)
-                .then(result=>{
-    
-                })
-                .catch();
-            } */
+        .then(()=>{
+            return Category.findOne({
+                _id: id
+            })
+            .exec();
+        })
+        .then((category) => 
+        {
+            if(!category)
+            {
+                return response.status(500)
+                    .json({
+                        error: "Category Does not Exists "
+                    });
+            }
 
             const categoryObj = {};
 
@@ -295,21 +301,46 @@ Controller.getAll = (request, response, next) => {
 Controller.delete = (request, response, next) => {
     const id = request.params.categoryID;
 
-    Category.remove({
-            _id: id
-        })
-        .then(result => {
-            response.status(200)
-                .json({
-                    message: 'Category Deleted Successfully'
+    Category.findOne({
+        _id: id
+    })
+    .exec()
+    .then((result)=>{
+        return new Promise((resolve,reject)=>{
+            if(result){
+                resolve(result);
+            }else{
+                reject({
+                    message : 'Category does not exists'
                 });
-        })
-        .catch(err => {
-            response.status(500)
-                .json({
-                    error: err
-                });
+            }
         });
+    })
+    .then((result) => {
+        Category.remove({
+                _id: id
+            })
+            .exec()
+            .then(result => {
+                response.status(200)
+                    .json({
+                        message: 'Category Deleted Successfully'
+                    });
+            })
+            .catch(err => {
+                response.status(500)
+                    .json({
+                        error: err
+                    });
+            });
+    })
+    .catch(err => {
+        response.status(500)
+            .json({
+                error: err
+            });
+    });
+            
 };
 
 module.exports = Controller;
