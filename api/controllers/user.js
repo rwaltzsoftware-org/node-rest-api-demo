@@ -1,50 +1,54 @@
-const Role = require('../models/role');
+const User = require('../models/user');
 const Joi = require('joi');
-const config = require('../../config');
+const fs = require('fs');
+const appConfig = require('../../config');
 
 /*  Possible Routes  */
 
 const RequestUrl = function () {
     return {
         'list': {
-            "url": config.baseUrl + 'roles',
+            "url": appConfig.baseUrl + 'users',
             "method": "GET",
         },
         'details': {
-            "url": config.baseUrl + 'roles',
+            "url": appConfig.baseUrl + 'users',
             "method": "GET",
         },
         'create': {
-            "url": config.baseUrl + 'roles',
+            "url": appConfig.baseUrl + 'users',
             "method": "POST",
         },
         'update': {
-            "url": config.baseUrl + 'roles',
+            "url": appConfig.baseUrl + 'users',
             "method": "PUT",
         },
         'delete': {
-            "url": config.baseUrl + 'roles',
+            "url": appConfig.baseUrl + 'users',
             "method": "DELETE",
         },
     };
 };
 
-
 let Controller = {};
 
 Controller.listing = (request, response) => {
-    Role.find()
+    User.find()
+        .populate('roles', 'name')
         .exec()
         .then((data) => {
             let preparedData = data.map((tmpData) => {
 
-                /* Add Role Id to Url  */
+                /* Add User Id to Url  */
                 let tmpRequestData = new RequestUrl();
                 tmpRequestData.details.url = tmpRequestData.details.url + '/' + tmpData._id;
 
                 return {
                     _id: tmpData._id,
                     name: tmpData.name,
+                    email: tmpData.email,
+                    profileImage: tmpData.profileImage,
+                    roles: tmpData.roles,
                     requests: [{
                         'details': tmpRequestData.details
                     }]
@@ -59,22 +63,25 @@ Controller.listing = (request, response) => {
             return response.status(200).json(responseData);
         })
         .catch((error) => {
-            return response.status(500).json({
+            return response.status(error.status || 500).json({
                 'error': error.message
             });
         });
 
 };
 
+
 Controller.getDetails = (request, response) => {
-    Role.findOne({
-        _id: request.params.roleId
+
+    User.findOne({
+        _id: request.params.userId
     })
+        .populate('roles', 'name')
         .exec()
         .then((data) => {
             if (!data) {
                 return response.status(500).json({
-                    'message': 'Role Not Found'
+                    'message': 'User Not Found'
                 });
             }
 
@@ -88,13 +95,15 @@ Controller.getDetails = (request, response) => {
             let responseData = {
                 _id: data._id,
                 name: data.name,
+                email: data.email,
+                roles: data.roles,
                 requests: tmpRequestData
             };
 
             return response.status(200).json(responseData);
         })
         .catch((error) => {
-            return response.status(500).json({
+            return response.status(error.status || 500).json({
                 'error': error.message
             });
         });
@@ -104,6 +113,10 @@ Controller.getDetails = (request, response) => {
 Controller.store = (request, response) => {
     const validate = Joi.validate(request.body, {
         name: Joi.string().required(),
+        email: Joi.string().email().required(),
+        password: Joi.string().required(),
+        roles: Joi.any(),
+        profileImage: Joi.any(),
     });
 
     if (validate.error) {
@@ -112,15 +125,20 @@ Controller.store = (request, response) => {
         });
     }
 
+
     /*  Check Duplication  */
-    Role.findOne({
-        name: request.body.name,
+    User.findOne({
+        email: request.body.email,
     })
         .then((data) => {
             return new Promise((resolve, reject) => {
                 if (data) {
-                    const error = new Error("Role Already Exists");
+                    const error = new Error("User Already Exists");
                     error.status = 500;
+
+                    if (fs.existsSync(request.file.path)) {
+                        fs.unlinkSync(request.file.path);
+                    }
 
                     reject(error);
                 } else {
@@ -129,41 +147,51 @@ Controller.store = (request, response) => {
             });
         })
         .then(() => {
-
             /* Create New Role */
-            const role = new Role({
-                name: request.body.name
+            const user = new User({
+                name: request.body.name,
+                email: request.body.email,
+                password: request.body.password,
+                roles: request.body.roles,
+                profileImage: request.file.path
             });
 
-            return role.save()
+
+            user.save()
                 .then((data) => {
-                    /* Add Role Id to Url  */
+                    /* Add User Id to Url  */
                     let tmpRequestData = new RequestUrl();
-                    tmpRequestData.details.url = tmpRequestData.details.url + '/' + role._id;
+                    tmpRequestData.details.url = tmpRequestData.details.url + '/' + user._id;
 
                     return response
                         .status(201)
                         .json({
-                            message: "Role Created Succesfuly",
+                            message: "User Created Succesfuly",
                             requests: [{
                                 'details': tmpRequestData.details
                             }]
                         });
                 });
+
         })
         .catch((error) => {
             return response
-                .status(500)
+                .status(error.status || 500)
                 .json({
                     message: error.message
                 });
         });
 };
 
+
 Controller.update = (request, response) => {
 
     const validate = Joi.validate(request.body, {
         name: Joi.string().required(),
+        email: Joi.string().email(),
+        password: Joi.string(),
+        roles: Joi.any(),
+        profileImage: Joi.any(),
     });
 
     if (validate.error) {
@@ -173,44 +201,55 @@ Controller.update = (request, response) => {
     }
 
     /*  Check Duplication  */
-    Role.findOne({
-        name: request.body.name,
+    User.findOne({
+        email: request.body.email,
         _id: {
-            $ne: request.params.roleId
+            $ne: request.params.userId
         }
     })
         .then((data) => {
             return new Promise((resolve, reject) => {
                 if (data) {
-                    const error = new Error("Role Already Exists");
+                    const error = new Error("User with same Email Already Exists");
                     error.status = 500;
+
+                    if (fs.existsSync(request.file)) {
+                        fs.unlinkSync(request.file);
+                    }
 
                     reject(error);
                 } else {
                     resolve();
                 }
             });
+
         })
         .then(() => {
-            /* Update Role */
-            const role = {
-                name: request.body.name
-            };
+            /* Update User */
+            let user = {};
+            for (let tmp in request.body) {
+                user[tmp] = request.body[tmp];
+            }
 
-            let updateCriteria = { _id: request.params.roleId };
-            let updateData = { $set: role };
+            if (request.file) {
+                request.profileImage = request.file.path;
+            }
 
-            return Role.update(updateCriteria, updateData)
+            let updateCriteria = { _id: request.params.userId };
+            let updateData = { $set: user };
+
+
+            User.update(updateCriteria, updateData)
                 .exec()
                 .then((data) => {
 
                     let tmpRequestData = new RequestUrl();
-                    tmpRequestData.details.url = tmpRequestData.details.url + '/' + role._id;
+                    tmpRequestData.details.url = tmpRequestData.details.url + '/' + data._id;
 
                     return response
                         .status(200)
                         .json({
-                            message: "Role Updated Succesfuly",
+                            message: "User Updated Succesfuly",
                             requests: [{
                                 'details': tmpRequestData.details
                             }]
@@ -219,7 +258,7 @@ Controller.update = (request, response) => {
         })
         .catch((error) => {
             return response
-                .status(500)
+                .status(error.status || 500)
                 .json({
                     message: error.message
                 });
@@ -228,8 +267,8 @@ Controller.update = (request, response) => {
 
 Controller.delete = (request, response) => {
 
-    Role.deleteOne({
-        _id: request.params.roleId
+    User.deleteOne({
+        _id: request.params.userId
     })
         .exec()
         .then((data) => {
@@ -237,7 +276,7 @@ Controller.delete = (request, response) => {
             return response
                 .status(200)
                 .json({
-                    message: "Role Deleted Succesfuly",
+                    message: "User Deleted Succesfuly",
                     requests: []
                 });
         })

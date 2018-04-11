@@ -6,10 +6,10 @@ const roleController = require('../controllers/role');
 router.get('/', roleController.listing);
 
 /*  Details  */
-router.get('/:roleId', roleController.details);
+router.get('/:roleId', roleController.getDetails);
 
 /*  Create  */
-router.post('/', roleController.create);
+router.post('/', roleController.store);
 
 /*  Edit  */
 router.put('/:roleId', roleController.update);
