@@ -1,5 +1,3 @@
-"use strict"
-
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt'); //bcrypt package is used to encrypt password into hash
