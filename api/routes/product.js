@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const productController = require('../controllers/product');
 const config = require('../../config');
+const checkAuth = require('../middlewares/check-auth');
 
 const productFolder = './' + config.filePaths.product;
 
@@ -32,18 +33,18 @@ const upload = multer({
 
 
 /* Route - Product Add */
-router.post('/', upload.single('image'), productController.store);
+router.post('/', upload.single('image'),checkAuth, productController.store);
 
 /* Route - Get Specific Data using Id */
-router.get('/:productID', productController.get);
+router.get('/:productID',checkAuth, productController.get);
 
 /* Route - Update Product */
-router.put('/:productID', upload.single('image'), productController.update);
+router.put('/:productID', upload.single('image'),checkAuth, productController.update);
 
 /* Route - Getting All Produts */
-router.get('/', productController.getAll);
+router.get('/',checkAuth, productController.getAll);
 
 /* Route - Delete Product */
-router.delete('/:productID', productController.delete);
+router.delete('/:productID',checkAuth, productController.delete);
 
 module.exports = router;
