@@ -174,11 +174,11 @@ Controller.update = (request, response) => {
 
     /*  Check Duplication  */
     Role.findOne({
-        name: request.body.name,
-        _id: {
-            $ne: request.params.roleId
-        }
-    })
+            name: request.body.name,
+            _id: {
+                $ne: request.params.roleId
+            }
+        })
         .then((data) => {
             return new Promise((resolve, reject) => {
                 if (data) {
@@ -192,6 +192,19 @@ Controller.update = (request, response) => {
             });
         })
         .then(() => {
+            return Role.findOne({
+                _id: request.params.roleId
+            })
+                .exec();
+        })
+        .then((roleData) => {
+            if (!roleData) {
+                return response.status(500)
+                    .json({
+                        error: "Role Does not Exists "
+                    });
+            }
+
             /* Update Role */
             const role = {
                 name: request.body.name
@@ -228,27 +241,51 @@ Controller.update = (request, response) => {
 
 Controller.delete = (request, response) => {
 
-    Role.deleteOne({
-        _id: request.params.roleId
-    })
-        .exec()
-        .then((data) => {
-
-            return response
-                .status(200)
-                .json({
-                    message: "Role Deleted Succesfuly",
-                    requests: []
-                });
+        Role.findOne({
+            _id: request.params.roleId
         })
-        .catch((error) => {
+        .exec()
+        .then((result) => {
+            return new Promise((resolve, reject) => {
+                if (result) {
+                    resolve(result);
+                } else {
+                    reject({
+                        message: 'Role does not exists'
+                    });
+                }
+            });
+        })
+        .then((result) => {
+            
+            Role.deleteOne({
+                _id: request.params.roleId
+            })
+            .exec()
+            .then((data) => {
 
-            return response
-                .status(500)
+                return response
+                    .status(200)
+                    .json({
+                        message: "Role Deleted Succesfuly",
+                        requests: []
+                    });
+            })
+            .catch((error) => {
+
+                return response
+                    .status(500)
+                    .json({
+                        message: error.message
+                    });
+            });
+        })
+        .catch(err => {
+            response.status(500)
                 .json({
-                    message: error.message
+                    error: err
                 });
-        });
+        });        
 };
 
 module.exports = Controller;
