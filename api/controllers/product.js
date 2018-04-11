@@ -1,4 +1,5 @@
 const fs = require('fs');
+const Joi = require('joi');
 const Product = require('../models/product');
 const config = require('../../config');
 
@@ -35,6 +36,21 @@ let Controller = {};
 
 /* Controller - Product Add */
 Controller.store = (request, response, next) => {
+
+    /* validation */
+    const validate = Joi.validate(request.body, {
+        name: Joi.string().required(),
+        category: Joi.string().required(),
+        description: Joi.any(),
+        image: Joi.any()
+    });
+
+    if(validate.error){
+        return response.status(500)
+                        .json({
+                            message: validate.error.details[0].message
+                        });
+    }
 
     /* Check Product Name Duplication */
     Product.findOne({
@@ -151,6 +167,21 @@ Controller.get = (request, response, next) => {
 /* Controller - Update Product */
 Controller.update = (request, response, next) => {
     const id = request.params.productID;
+
+    /* validation */
+    const validate = Joi.validate(request.body,{
+        name: Joi.string().required(),
+        category: Joi.string().required(),
+        description: Joi.any(),
+        image: Joi.any()
+    })
+
+    if(validate.error){
+        return response.status(500)
+                        .json({
+                            message: validate.error.details[0].message
+                        });
+    }
 
     Product.findOne({
         name: request.body.name

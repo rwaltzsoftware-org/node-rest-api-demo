@@ -1,4 +1,5 @@
 const fs = require('fs');
+const Joi = require('joi');
 const Category = require('../models/category');
 const config = require('../../config');
 
@@ -35,6 +36,20 @@ let Controller = {};
 
 /* Controller - Category Add */
 Controller.store = (request, response, next) => {
+
+    /* validation */
+    const validate = Joi.validate(request.body, {
+        name: Joi.string().required(),
+        description: Joi.any(),
+        image: Joi.any()
+    });
+
+    if (validate.error) {
+        return response.status(500)
+            .json({
+                message: validate.error.details[0].message
+            });
+    }
 
     /* Check Category Name Duplication */
     Category.findOne({
@@ -152,6 +167,20 @@ Controller.get = (request, response, next) => {
 /* Controller - Update Category */
 Controller.update = (request, response, next) => {
     const id = request.params.categoryID;
+
+    /* validation */
+    const validate = Joi.validate(request.body, {
+        name: Joi.string().required(),
+        description: Joi.any(),
+        image: Joi.any()
+    });
+
+    if (validate.error) {
+        return response.status(500)
+            .json({
+                message: validate.error.details[0].message
+            });
+    }
 
     Category.findOne({
             name: request.body.name
