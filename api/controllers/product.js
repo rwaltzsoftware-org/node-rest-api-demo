@@ -300,7 +300,7 @@ Controller.getAll = (request, response, next) => {
 Controller.delete = (request, response, next) => {
     const id = request.params.productID;
 
-    Category.findOne({
+    Product.findOne({
             _id: id
         })
         .exec()
