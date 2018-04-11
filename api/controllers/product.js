@@ -197,14 +197,19 @@ Controller.update = (request, response, next) => {
             });
         })
         .then(() => {
-            /* Unlink Existing Image - If image upload */
-            /* if(request.file != undefined){
-                Product.findById(id)
-                .then(result=>{
-    
-                })
-                .catch();
-            } */
+            return Product.findOne({
+                _id: id
+            })
+                .exec();
+        })
+        .then((product) => {
+
+            if (!product) {
+                return response.status(500)
+                    .json({
+                        error: "Product Does not Exists "
+                    });
+            }
 
             const productObj = {};
 
@@ -295,11 +300,35 @@ Controller.getAll = (request, response, next) => {
 Controller.delete = (request, response, next) => {
     const id = request.params.productID;
 
-    Product.remove({ _id: id })
-        .then(result => {
-            response.status(200)
-                .json({
-                    message: 'Product Deleted Successfully'
+    Category.findOne({
+            _id: id
+        })
+        .exec()
+        .then((result) => {
+            return new Promise((resolve, reject) => {
+                if (result) {
+                    resolve(result);
+                } else {
+                    reject({
+                        message: 'Product does not exists'
+                    });
+                }
+            });
+        })
+        .then((result) => {
+            Product.remove({ _id: id })
+                .exec()
+                .then(result => {
+                    response.status(200)
+                        .json({
+                            message: 'Product Deleted Successfully'
+                        });
+                })
+                .catch(err => {
+                    response.status(500)
+                        .json({
+                            error: err
+                        });
                 });
         })
         .catch(err => {
@@ -308,6 +337,7 @@ Controller.delete = (request, response, next) => {
                     error: err
                 });
         });
+
 };
 
 
