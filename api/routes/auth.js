@@ -1,4 +1,5 @@
 "use strict"
+
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt'); //bcrypt package is used to encrypt password into hash
@@ -9,7 +10,6 @@ const Joi = require('joi');
 const router = express.Router();
 const AuthController = require('../controllers/auth');
 const User = require('../models/user');
-
 
 router.post("/signup",AuthController.signup);
 
