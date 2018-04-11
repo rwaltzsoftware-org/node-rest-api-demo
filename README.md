@@ -28,7 +28,7 @@ Run # <b> npm start </b>
 
 # API Documentation 
 
-https://documenter.getpostman.com/view/4119951/node-rest-api/RVu7DTNC
+<a href="https://documenter.getpostman.com/view/4119951/node-rest-api/RVu7DTNC" target="_blank"> Click Here </a>
 
 
 
