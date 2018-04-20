@@ -10,7 +10,6 @@ const AuthController = require('../controllers/auth');
 const User = require('../models/user');
 const checkAuth = require('../middlewares/check-auth');
 
-
 router.post("/signup", AuthController.signup);
 
 router.post("/login", AuthController.login);
