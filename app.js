@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const logger = require('morgan');
 const mongoose = require("mongoose");
@@ -23,6 +24,8 @@ const app = express();
 
 /*  Mongoose Connect */
 mongoose.connect(connection);
+
+app.use(cors());
 
 app.use(logger('dev'));
 
