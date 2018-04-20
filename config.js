@@ -1,6 +1,6 @@
 let appConfig = {
     protocol: 'http://',
-    host: '192.168.1.11',
+    host: '192.168.1.12',
     port: process.env.NODE_APP_PORT || 3000,
     saltRounds: 15,
     secretKey: "X1t(01?G449042l",

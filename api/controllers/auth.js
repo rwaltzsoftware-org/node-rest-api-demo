@@ -62,7 +62,7 @@ exports.signup = (request, response, next) => {
         })
         .catch((error) => {
             response.status(error.status || 500).json({
-                error: error.message
+                message: error.message
             });
         });
 
@@ -127,7 +127,7 @@ exports.login = (request, response, next) => {
         })
         .catch((error) => {
             response.status(error.status || 500).json({
-                error: error.message
+                message: error.message
                 //message: "Email address not found"
             });
         });
@@ -155,7 +155,7 @@ exports.forgotPassword = (request, response, next) => {
         .then((user) => {
             return new Promise((resolve, reject) => {
                 if (!user) {
-                    const error = new Error("User with Email address not found");
+                    const error = new Error("Invalid Email Address");
                     error.status = 404;
                     reject(error);
                 } else {
@@ -191,7 +191,7 @@ exports.forgotPassword = (request, response, next) => {
         })
         .catch((error) => {
             response.status(error.status || 500).json({
-                error: error.message
+                message: error.message
                 //message: "Email address is invalid"
             });
         });
@@ -257,7 +257,7 @@ exports.resetPassword = (request, response, next) => {
         })
         .catch((error) => {           
             response.status(error.status || 500).json({
-                error: error.message
+                message: error.message
                 //message: "Invalid Reset Code"
             });
         });
