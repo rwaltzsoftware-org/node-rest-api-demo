@@ -1,6 +1,6 @@
 let appConfig = {
     protocol: 'http://',
-    host: '192.168.1.11',
+    host: 'localhost',
     port: process.env.NODE_APP_PORT || 3000,
     saltRounds: 15,
     secretKey: "X1t(01?G449042l",
@@ -9,7 +9,7 @@ let appConfig = {
 }
 
 let dbConfig = {
-    connection: 'mongodb://192.168.1.12:27017/nodeRestApi'
+    connection: 'mongodb://localhost:27017/nodeRestApi'
 }
 
 let filePaths = {
