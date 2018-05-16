@@ -30,7 +30,7 @@ In config.js
 ```
 let appConfig = {
     protocol: 'http://',
-    host: '192.168.1.11', // Listening Server Address 
+    host: 'localhost', // Listening Server Address 
     port: process.env.NODE_APP_PORT || 3000, // Listening Server Port 
     saltRounds: 15, // Used for JWT Token Generation
     secretKey: "X1t(01?G449042l", // Used for JWT Token Generation
@@ -39,7 +39,7 @@ let appConfig = {
 }
 
 let dbConfig = {
-    connection: 'mongodb://192.168.1.12:27017/nodeRestApi' // Mongo DB Connection String
+    connection: 'mongodb://localhost:27017/nodeRestApi' // Mongo DB Connection String
 }
 
 let filePaths = {
